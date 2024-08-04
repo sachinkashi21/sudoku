@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/sudoku.css">
+    <link rel="stylesheet" href="/UI.css">
+</head>
+
+<body>
+    <h1 class="title"> Play Sudoku </h1>
+    <div class="box" id="sudoku-board">
+    </div>
+    <!-- <form > -->
+    <button class="btn" onclick="(e)=>{
+            console.log(`hello`);
+        }">
+        Submit
+    </button>
+    <!-- </form> -->
+</body>
+
+<script>
+
+    const matrix = JSON.parse('<%=matrix%>');
+    console.log(matrix);
+    // if(!matrix){
+    // const matrix = [
+    //     [5, 3, 0, 0, 7, 0, 0, 0, 0],
+    //     [6, 0, 0, 1, 9, 5, 0, 0, 0],
+    //     [0, 9, 8, 0, 0, 0, 0, 6, 0],
+    //     [8, 0, 0, 0, 6, 0, 0, 0, 3],
+    //     [4, 0, 0, 8, 0, 3, 0, 0, 1],
+    //     [7, 0, 0, 0, 2, 0, 0, 0, 6],
+    //     [0, 6, 0, 0, 0, 0, 2, 8, 0],
+    //     [0, 0, 0, 4, 1, 9, 0, 0, 5],
+    //     [0, 0, 0, 0, 8, 0, 0, 7, 9]
+    // ];
+    // } 
+
+
+
+    function validateTheCell(curCell) {
+        curCell.classList.remove("cell-illegal");
+        let row = curCell.name[5];
+        let col = curCell.name[7];
+        let box = curCell.name[9];
+        // console.log(row,col,box);
+        for (let i = 0; i < 9; i++) {
+            if (i != row && matrix[row][col] == matrix[i][col]) {
+                curCell.classList.add("cell-illegal")
+                // console.log(curCell);
+                break;
+            }
+        }
+        for (let i = 0; i < 9; i++) {
+            if (i != col && matrix[row][col] == matrix[row][i]) {
+                curCell.classList.add("cell-illegal")
+                // console.log(curCell);
+                break;
+            }
+        }
+
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                let r = i + (3 * Math.floor(box / 3));
+                let c = j + (3 * (box % 3));
+
+                if (r != row && c != col && matrix[r][c] == matrix[row][col]) {
+                    curCell.classList.add("cell-illegal")
+                    return;
+                }
+            }
+        }
+    }
+
+
+    window.onload = function () {
+        const board = document.getElementById('sudoku-board');
+        for (let k = 0; k < 9; k++) {
+            const singleBox = document.createElement('div');
+            singleBox.className = 'singleBox';
+            for (let i = 0; i < 9; i++) {
+                let idx = Math.floor(i / 3) + (3 * Math.floor(k / 3));
+                let jdx = (i % 3) + (3 * (k % 3));
+                const cell = document.createElement('input');
+                cell.type = 'number';
+                cell.name = `cell-${idx}-${jdx}-${k}`;
+                cell.min = 1;
+                cell.max = 9;
+                cell.className = 'cell';
+                if (matrix[idx][jdx] !== 0) {
+                    cell.value = matrix[idx][jdx];
+                    cell.readOnly = true;
+                    cell.classList.add('cell-given');
+                    // console.log(cell);
+                } else {
+                    cell.value = "";
+                }
+                singleBox.appendChild(cell);
+            }
+            board.appendChild(singleBox);
+        }
+
+        let cells = document.querySelectorAll('.cell');
+        cells.forEach(cell => {
+            cell.addEventListener('input', () => {
+                let value = cell.value;
+                if (value.length > 1) {
+                    value = value.charAt(value.length - 1);
+                }
+                if (value < 1 || value > 9) {
+                    cell.value = '';
+                    cell.classList.remove("cell-illegal");
+                    matrix[parseInt(cell.name[5])][parseInt(cell.name[7])] = 0;
+                } else {
+                    cell.value = value;
+                    matrix[parseInt(cell.name[5])][parseInt(cell.name[7])] = parseInt(cell.value);
+                    // console.log(matrix);
+                    validateTheCell(cell);
+                }
+            });
+            // cell.addEventListener("",()=>{
+            //     let selCells=document.querySelectorAll(".cell");
+            //     for(let selCell of selCells){
+            //         if(selCell.value===cell.value){
+            //             selCell.classList.add("cell-selected");
+            //         }
+            //     }
+            // })
+        });
+
+    }
+</script>
+
+</html>
